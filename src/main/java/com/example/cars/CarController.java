@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cars")
@@ -22,7 +23,7 @@ public class CarController {
         this.cars = new ArrayList<>();
 
         cars.add(new Car(1L, "Polonez", "Caro", Color.BLACK));
-        cars.add(new Car(2L, "Fiat", "125p", Color.BLUE));
+        cars.add(new Car(2L, "Fiat", "125p", Color.BLACK));
         cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
     }
 
@@ -42,6 +43,19 @@ public class CarController {
 
         if (carOptional.isPresent()) {
             return new ResponseEntity<>(carOptional.get(), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/color/{color}")
+    public ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
+        List<Car> foundCars = cars.stream()
+                .filter(e -> Objects.equals(e.getColor().toString().toLowerCase(), color.toLowerCase()))
+                .collect(Collectors.toList());
+
+        if (foundCars.size()>0) {
+            return new ResponseEntity<>(foundCars, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
