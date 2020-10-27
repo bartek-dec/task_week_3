@@ -88,4 +88,19 @@ public class CarController {
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Car> deleteCar(@PathVariable Long id) {
+        Optional<Car> carOptional = cars.stream()
+                .filter(e -> Objects.equals(e.getId(), id))
+                .findFirst();
+
+        if (carOptional.isPresent()) {
+            cars.remove(carOptional.get());
+
+            return new ResponseEntity<>(carOptional.get(), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
