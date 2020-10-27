@@ -89,6 +89,39 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Car> modifyCar(@PathVariable Long id, @RequestBody Car car) {
+        Optional<Car> carOptional = cars.stream()
+                .filter(e -> Objects.equals(e.getId(), id))
+                .findFirst();
+
+        if (carOptional.isPresent()) {
+            Car foundCar = carOptional.get();
+            cars.remove(foundCar);
+
+            if (car.getId() != null) {
+                foundCar.setId(car.getId());
+            }
+
+            if (car.getMark() != null) {
+                foundCar.setMark(car.getMark());
+            }
+
+            if (car.getModel() != null) {
+                foundCar.setModel(car.getModel());
+            }
+
+            if (car.getColor() != null) {
+                foundCar.setColor(car.getColor());
+            }
+
+            cars.add(foundCar);
+            return new ResponseEntity<>(foundCar, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Car> deleteCar(@PathVariable Long id) {
         Optional<Car> carOptional = cars.stream()
