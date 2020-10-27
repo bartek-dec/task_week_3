@@ -72,4 +72,20 @@ public class CarController {
 
         return new ResponseEntity<>(car, HttpStatus.CREATED);
     }
+
+    @PutMapping
+    public ResponseEntity<Car> updateCar(@RequestBody Car car) {
+        Optional<Car> carOptional = cars.stream()
+                .filter(e -> Objects.equals(e.getId(), car.getId()))
+                .findFirst();
+
+        if (carOptional.isPresent()) {
+            cars.remove(carOptional.get());
+            cars.add(car);
+
+            return new ResponseEntity<>(car, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
