@@ -1,5 +1,6 @@
 package com.example.cars;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -7,17 +8,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cars")
 public class CarController {
 
     private List<Car> cars;
+    private CarService carService;
 
-    public CarController() {
+    @Autowired
+    public CarController(CarService carService) {
+        this.carService = carService;
         this.cars = new ArrayList<>();
 
         cars.add(new Car(1L, "Polonez", "Caro", Color.BLACK));
@@ -27,114 +29,54 @@ public class CarController {
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Car>> getCars() {
-        if (cars.size() > 0) {
-            return new ResponseEntity<>(cars, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        List<Car> foundCars = carService.getCars();
+
+        return foundCars.size() > 0 ? new ResponseEntity<>(foundCars, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-        Optional<Car> carOptional = cars.stream()
-                .filter(e -> Objects.equals(e.getId(), id))
-                .findFirst();
 
-        if (carOptional.isPresent()) {
-            return new ResponseEntity<>(carOptional.get(), HttpStatus.OK);
-        }
+        return carService.getCarById(id).map(car -> new ResponseEntity<>(car, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "/color/{color}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
-        List<Car> foundCars = cars.stream()
-                .filter(e -> Objects.equals(e.getColor().toString().toLowerCase(), color.toLowerCase()))
-                .collect(Collectors.toList());
+        List<Car> foundCars = carService.getCarsByColor(color);
 
-        if (foundCars.size() > 0) {
-            return new ResponseEntity<>(foundCars, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return foundCars.size() > 0 ? new ResponseEntity<>(foundCars, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> addCar(@RequestBody Car car) {
-        Optional<Car> carOptional = cars.stream()
-                .filter(e -> Objects.equals(e.getId(), car.getId()))
-                .findFirst();
+        Optional<Car> carOptional = carService.getCarById(car.getId());
 
-        if (carOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
-        cars.add(car);
-
-        return new ResponseEntity<>(car, HttpStatus.CREATED);
+        return carOptional.isEmpty() ? new ResponseEntity<>(carService.addCar(car), HttpStatus.CREATED)
+                : new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> updateCar(@RequestBody Car car) {
-        Optional<Car> carOptional = cars.stream()
-                .filter(e -> Objects.equals(e.getId(), car.getId()))
-                .findFirst();
 
-        if (carOptional.isPresent()) {
-            cars.remove(carOptional.get());
-            cars.add(car);
-
-            return new ResponseEntity<>(car, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return carService.updateCar(car).map(e -> new ResponseEntity<>(e, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PatchMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> modifyCar(@PathVariable Long id, @RequestBody Car car) {
-        Optional<Car> carOptional = cars.stream()
-                .filter(e -> Objects.equals(e.getId(), id))
-                .findFirst();
 
-        if (carOptional.isPresent()) {
-            Car foundCar = carOptional.get();
-            cars.remove(foundCar);
-
-            if (car.getId() != null) {
-                foundCar.setId(car.getId());
-            }
-
-            if (car.getMark() != null) {
-                foundCar.setMark(car.getMark());
-            }
-
-            if (car.getModel() != null) {
-                foundCar.setModel(car.getModel());
-            }
-
-            if (car.getColor() != null) {
-                foundCar.setColor(car.getColor());
-            }
-
-            cars.add(foundCar);
-            return new ResponseEntity<>(foundCar, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return carService.modifyCar(id, car).map(e -> new ResponseEntity<>(e, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> deleteCar(@PathVariable Long id) {
-        Optional<Car> carOptional = cars.stream()
-                .filter(e -> Objects.equals(e.getId(), id))
-                .findFirst();
 
-        if (carOptional.isPresent()) {
-            cars.remove(carOptional.get());
-
-            return new ResponseEntity<>(carOptional.get(), HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return carService.deleteCar(id).map(e -> new ResponseEntity<>(e, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
