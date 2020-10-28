@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,17 +13,11 @@ import java.util.Optional;
 @RequestMapping("/api/cars")
 public class CarController {
 
-    private List<Car> cars;
     private CarService carService;
 
     @Autowired
     public CarController(CarService carService) {
         this.carService = carService;
-        this.cars = new ArrayList<>();
-
-        cars.add(new Car(1L, "Polonez", "Caro", Color.BLACK));
-        cars.add(new Car(2L, "Fiat", "125p", Color.BLACK));
-        cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
     }
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
