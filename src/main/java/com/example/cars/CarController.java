@@ -1,6 +1,7 @@
 package com.example.cars;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class CarController {
         cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
     }
 
-    @GetMapping
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Car>> getCars() {
         if (cars.size() > 0) {
             return new ResponseEntity<>(cars, HttpStatus.OK);
@@ -32,7 +33,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
         Optional<Car> carOptional = cars.stream()
                 .filter(e -> Objects.equals(e.getId(), id))
@@ -45,7 +46,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/color/{color}")
+    @GetMapping(value = "/color/{color}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
         List<Car> foundCars = cars.stream()
                 .filter(e -> Objects.equals(e.getColor().toString().toLowerCase(), color.toLowerCase()))
@@ -58,7 +59,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> addCar(@RequestBody Car car) {
         Optional<Car> carOptional = cars.stream()
                 .filter(e -> Objects.equals(e.getId(), car.getId()))
@@ -73,7 +74,7 @@ public class CarController {
         return new ResponseEntity<>(car, HttpStatus.CREATED);
     }
 
-    @PutMapping
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> updateCar(@RequestBody Car car) {
         Optional<Car> carOptional = cars.stream()
                 .filter(e -> Objects.equals(e.getId(), car.getId()))
@@ -89,7 +90,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> modifyCar(@PathVariable Long id, @RequestBody Car car) {
         Optional<Car> carOptional = cars.stream()
                 .filter(e -> Objects.equals(e.getId(), id))
@@ -122,7 +123,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> deleteCar(@PathVariable Long id) {
         Optional<Car> carOptional = cars.stream()
                 .filter(e -> Objects.equals(e.getId(), id))
