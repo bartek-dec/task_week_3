@@ -1,8 +1,10 @@
 package com.example.cars;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import java.util.Objects;
 
-public class Car {
+public class Car extends RepresentationModel<Car> {
 
     private Long id;
     private String mark;
