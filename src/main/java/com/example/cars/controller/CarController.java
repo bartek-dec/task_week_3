@@ -22,7 +22,7 @@ public class CarController {
         this.carService = carService;
     }
 
-    @GetMapping("/main")
+    @GetMapping("/")
     public String mainPaige(Model model) {
         List<Car> cars = carService.getCars();
 
@@ -45,7 +45,7 @@ public class CarController {
         }
         carService.addCar(car);
 
-        return "redirect:" + "/main";
+        return "redirect:" + "/";
     }
 
     @GetMapping("/edit/{id}")
@@ -59,14 +59,14 @@ public class CarController {
     public String editCar(@ModelAttribute Car car) {
         carService.modifyCar(car.getId(), car);
 
-        return "redirect:" + "/main";
+        return "redirect:" + "/";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteCar(@PathVariable Long id) {
         carService.deleteCar(id);
 
-        return "redirect:" + "/main";
+        return "redirect:" + "/";
     }
 
     @GetMapping("/find")
