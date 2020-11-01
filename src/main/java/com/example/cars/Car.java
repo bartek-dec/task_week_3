@@ -2,13 +2,26 @@ package com.example.cars;
 
 import org.springframework.hateoas.RepresentationModel;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class Car extends RepresentationModel<Car> {
 
+    @Min(value = 1, message = "Value mast be at least 1")
     private Long id;
+
+    @NotBlank(message = "Mark cannot be blank")
+    @Size(min = 2, message = "Mark must be at least 2 characters length")
     private String mark;
+
+    @NotBlank(message = "Model cannot be blank")
+    @Size(min = 1, message = "Model must be at least 1 character length")
     private String model;
+
+    @NotNull
     private Color color;
 
     public Car() {
