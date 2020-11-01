@@ -2,15 +2,13 @@ package com.example.cars;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class CarServiceImpl implements CarService {
 
+    private Long index;
     private List<Car> cars;
 
     public CarServiceImpl() {
@@ -19,11 +17,15 @@ public class CarServiceImpl implements CarService {
         cars.add(new Car(1L, "Polonez", "Caro", Color.BLACK));
         cars.add(new Car(2L, "Fiat", "125p", Color.BLACK));
         cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
+
+        index = (long) cars.size();
     }
 
     @Override
     public List<Car> getCars() {
-        return cars;
+        return cars.stream()
+                .sorted(Comparator.comparingLong(Car::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -42,6 +44,10 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
+
+        if (car.getId() == null) {
+            car.setId(++index);
+        }
         cars.add(car);
 
         return car;
@@ -74,11 +80,11 @@ public class CarServiceImpl implements CarService {
                 foundCar.setId(car.getId());
             }
 
-            if (car.getMark() != null) {
+            if (car.getMark() != null && !Objects.equals(car.getMark(), "")) {
                 foundCar.setMark(car.getMark());
             }
 
-            if (car.getModel() != null) {
+            if (car.getModel() != null && !Objects.equals(car.getModel(), "")) {
                 foundCar.setModel(car.getModel());
             }
 
