@@ -1,5 +1,7 @@
-package com.example.cars;
+package com.example.cars.restcontroller;
 
+import com.example.cars.Car;
+import com.example.cars.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -15,12 +17,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/api/cars")
-public class CarController {
+public class CarControllerRest {
 
     private CarService carService;
 
     @Autowired
-    public CarController(CarService carService) {
+    public CarControllerRest(CarService carService) {
         this.carService = carService;
     }
 
@@ -28,8 +30,8 @@ public class CarController {
     public ResponseEntity<CollectionModel<Car>> getCars() {
         List<Car> foundCars = carService.getCars();
 
-        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarController.class).slash(car.getId()).withSelfRel()));
-        Link link = linkTo(CarController.class).withSelfRel();
+        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel()));
+        Link link = linkTo(CarControllerRest.class).withSelfRel();
         CollectionModel<Car> resources = CollectionModel.of(foundCars, link);
 
         return foundCars.size() > 0 ? new ResponseEntity<>(resources, HttpStatus.OK)
@@ -38,7 +40,7 @@ public class CarController {
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-        Link link = linkTo(CarController.class).slash(id).withSelfRel();
+        Link link = linkTo(CarControllerRest.class).slash(id).withSelfRel();
 
         return carService.getCarById(id).map(car -> new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -49,9 +51,9 @@ public class CarController {
     public ResponseEntity<CollectionModel<Car>> getCarsByColor(@PathVariable String color) {
         List<Car> foundCars = carService.getCarsByColor(color);
 
-        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarController.class).slash(car.getId()).withSelfRel()));
-        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarController.class).withRel("allColors")));
-        Link link = linkTo(CarController.class).slash("color").slash(color).withSelfRel();
+        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel()));
+        foundCars.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarControllerRest.class).withRel("allColors")));
+        Link link = linkTo(CarControllerRest.class).slash("color").slash(color).withSelfRel();
         CollectionModel<Car> resources = CollectionModel.of(foundCars, link);
 
         return foundCars.size() > 0 ? new ResponseEntity<>(resources, HttpStatus.OK)
@@ -64,7 +66,7 @@ public class CarController {
 
         if (carOptional.isEmpty()) {
             carService.addCar(car);
-            Link link = linkTo(CarController.class).slash(car.getId()).withSelfRel();
+            Link link = linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel();
 
             return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
         }
@@ -77,7 +79,7 @@ public class CarController {
         Optional<Car> carOptional = carService.updateCar(car);
 
         if (carOptional.isPresent()) {
-            Link link = linkTo(CarController.class).slash(car.getId()).withSelfRel();
+            Link link = linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel();
 
             return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.OK);
         }
@@ -90,7 +92,7 @@ public class CarController {
 
         if (carOptional.isPresent()) {
             Car modifiedCar = carOptional.get();
-            Link link = linkTo(CarController.class).slash(id).withSelfRel();
+            Link link = linkTo(CarControllerRest.class).slash(id).withSelfRel();
 
             return new ResponseEntity<>(modifiedCar.addIf(!modifiedCar.hasLinks(), () -> link), HttpStatus.OK);
         }
