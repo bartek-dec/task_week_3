@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 @Service
 public class CarServiceImpl implements CarService {
 
-    private Long index;
+    private Long id;
     private List<Car> cars;
 
     public CarServiceImpl() {
@@ -18,7 +18,7 @@ public class CarServiceImpl implements CarService {
         cars.add(new Car(2L, "Fiat", "125p", Color.BLACK));
         cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
 
-        index = (long) cars.size();
+        id = (long) cars.size();
     }
 
     @Override
@@ -46,11 +46,18 @@ public class CarServiceImpl implements CarService {
     public Car addCar(Car car) {
 
         if (car.getId() == null) {
-            car.setId(++index);
+            Long currentId = getId();
+            car.setId(++currentId);
         }
         cars.add(car);
 
         return car;
+    }
+
+    private Long getId() {
+        return cars.stream()
+                .map(Car::getId)
+                .max(Comparator.comparingLong(Long::longValue)).get();
     }
 
     @Override
