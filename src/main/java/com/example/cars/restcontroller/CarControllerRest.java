@@ -8,8 +8,11 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +37,7 @@ public class CarControllerRest {
         Link link = linkTo(CarControllerRest.class).withSelfRel();
         CollectionModel<Car> resources = CollectionModel.of(foundCars, link);
 
-        return foundCars.size() > 0 ? new ResponseEntity<>(resources, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -61,17 +63,16 @@ public class CarControllerRest {
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Car> addCar(@RequestBody Car car) {
-        Optional<Car> carOptional = carService.getCarById(car.getId());
+    public ResponseEntity<Car> addCar(@Validated @RequestBody Car car, BindingResult result) {
 
-        if (carOptional.isEmpty()) {
-            carService.addCar(car);
-            Link link = linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel();
-
-            return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
+        carService.addCar(car);
+        Link link = linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel();
+
+        return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

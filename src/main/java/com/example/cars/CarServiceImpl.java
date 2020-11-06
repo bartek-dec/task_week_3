@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 @Service
 public class CarServiceImpl implements CarService {
 
-    private Long id;
     private List<Car> cars;
 
     public CarServiceImpl() {
@@ -17,8 +16,6 @@ public class CarServiceImpl implements CarService {
         cars.add(new Car(1L, "Polonez", "Caro", Color.BLACK));
         cars.add(new Car(2L, "Fiat", "125p", Color.BLACK));
         cars.add(new Car(3L, "Alfa Romeo", "Mito", Color.GREEN));
-
-        id = (long) cars.size();
     }
 
     @Override
@@ -44,11 +41,8 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
-
-        if (car.getId() == null) {
-            Long currentId = getId();
-            car.setId(++currentId);
-        }
+        Long currentId = getId();
+        car.setId(++currentId);
         cars.add(car);
 
         return car;
@@ -67,10 +61,11 @@ public class CarServiceImpl implements CarService {
                 .findFirst();
 
         return carOptional.map(e -> {
-            cars.remove(e);
-            cars.add(car);
-            return Optional.of(car);
-        }).orElse(Optional.empty());
+            e.setMark(car.getMark());
+            e.setModel(car.getModel());
+            e.setColor(car.getColor());
+            return e;
+        });
     }
 
     @Override
@@ -81,11 +76,6 @@ public class CarServiceImpl implements CarService {
 
         if (carOptional.isPresent()) {
             Car foundCar = carOptional.get();
-            cars.remove(foundCar);
-
-            if (car.getId() != null) {
-                foundCar.setId(car.getId());
-            }
 
             if (car.getMark() != null && !Objects.equals(car.getMark(), "")) {
                 foundCar.setMark(car.getMark());
@@ -99,7 +89,6 @@ public class CarServiceImpl implements CarService {
                 foundCar.setColor(car.getColor());
             }
 
-            cars.add(foundCar);
             return Optional.of(foundCar);
         }
 
