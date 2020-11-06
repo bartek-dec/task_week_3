@@ -6,6 +6,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,8 +34,7 @@ public class CarController {
         Link link = linkTo(CarController.class).withSelfRel();
         CollectionModel<Car> resources = CollectionModel.of(foundCars, link);
 
-        return foundCars.size() > 0 ? new ResponseEntity<>(resources, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -59,17 +60,15 @@ public class CarController {
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Car> addCar(@RequestBody Car car) {
-        Optional<Car> carOptional = carService.getCarById(car.getId());
-
-        if (carOptional.isEmpty()) {
-            carService.addCar(car);
-            Link link = linkTo(CarController.class).slash(car.getId()).withSelfRel();
-
-            return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
+    public ResponseEntity<Car> addCar(@Validated @RequestBody Car car, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
+        carService.addCar(car);
+        Link link = linkTo(CarController.class).slash(car.getId()).withSelfRel();
+
+        return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

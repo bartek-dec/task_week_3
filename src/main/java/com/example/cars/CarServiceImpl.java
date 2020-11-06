@@ -2,10 +2,7 @@ package com.example.cars;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +20,9 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public List<Car> getCars() {
-        return cars;
+        return cars.stream()
+                .sorted(Comparator.comparingLong(Car::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -42,9 +41,17 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) {
+        Long currentId = getId();
+        car.setId(++currentId);
         cars.add(car);
 
         return car;
+    }
+
+    private Long getId() {
+        return cars.stream()
+                .map(Car::getId)
+                .max(Comparator.comparingLong(Long::longValue)).get();
     }
 
     @Override
@@ -54,10 +61,11 @@ public class CarServiceImpl implements CarService {
                 .findFirst();
 
         return carOptional.map(e -> {
-            cars.remove(e);
-            cars.add(car);
-            return Optional.of(car);
-        }).orElse(Optional.empty());
+            e.setMark(car.getMark());
+            e.setModel(car.getModel());
+            e.setColor(car.getColor());
+            return e;
+        });
     }
 
     @Override
@@ -68,7 +76,6 @@ public class CarServiceImpl implements CarService {
 
         if (carOptional.isPresent()) {
             Car foundCar = carOptional.get();
-            cars.remove(foundCar);
 
             if (car.getId() != null) {
                 foundCar.setId(car.getId());
@@ -86,7 +93,6 @@ public class CarServiceImpl implements CarService {
                 foundCar.setColor(car.getColor());
             }
 
-            cars.add(foundCar);
             return Optional.of(foundCar);
         }
 
