@@ -12,7 +12,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,10 +68,10 @@ public class CarControllerRest {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        carService.addCar(car);
+        Car newCar = carService.addCar(car);
         Link link = linkTo(CarControllerRest.class).slash(car.getId()).withSelfRel();
 
-        return new ResponseEntity<>(car.addIf(!car.hasLinks(), () -> link), HttpStatus.CREATED);
+        return new ResponseEntity<>(newCar.addIf(!newCar.hasLinks(), () -> link), HttpStatus.CREATED);
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
